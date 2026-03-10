@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Heliana's Guide — Monster Hunting Companion</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&family=Cinzel:wght@400;600;700&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/src/style.css" />
+</head>
+<body>
+  <div id="app">
+    <header class="site-header">
+      <div class="header-inner">
+        <div class="logo-block">
+          <span class="logo-icon">⚔</span>
+          <div>
+            <h1 class="site-title">Heliana's Guide</h1>
+            <p class="site-subtitle">Monster Hunting Companion</p>
+          </div>
+        </div>
+        <div class="header-ornament">✦ ✦ ✦</div>
+      </div>
+    </header>
+
+    <nav class="tab-nav" id="tabNav">
+      <button class="tab-btn active" data-tab="harvest">⚗ Harvest</button>
+      <button class="tab-btn" data-tab="generator">🎲 Part Generator</button>
+      <button class="tab-btn" data-tab="cooking">🍖 Cooking</button>
+      <button class="tab-btn" data-tab="crafting">🛡 Crafting</button>
+      <button class="tab-btn" data-tab="effects">✨ Effects</button>
+      <button class="tab-btn" data-tab="dice">🎯 Dice & Quirks</button>
+    </nav>
+
+    <main class="tab-content" id="tabContent">
+      <div class="loading-screen" id="loadingScreen">
+        <div class="loading-rune">⚗</div>
+        <p>Consulting the grimoire…</p>
+      </div>
+
+      <!-- HARVEST TAB -->
+      <section class="tab-panel active" id="tab-harvest">
+        <div class="panel-header">
+          <h2>Harvest Calculator</h2>
+          <p>Select a creature type to view its components and calculate cumulative DCs.</p>
+        </div>
+        <div class="harvest-layout">
+          <div class="harvest-controls card">
+            <label class="field-label">Creature Type</label>
+            <select id="harvestTypeSelect" class="select-input">
+              <option value="">— Select type —</option>
+            </select>
+            <label class="field-label mt">Creature CR (for Essence)</label>
+            <input type="number" id="harvestCR" class="text-input" placeholder="e.g. 9" min="0" max="30" />
+            <label class="field-label mt">Condition Modifier</label>
+            <select id="harvestCondition" class="select-input">
+              <option value="0">Pristine (+0)</option>
+              <option value="-2">Damaged (−2 to all DCs)</option>
+              <option value="-5">Destroyed (−5 to all DCs)</option>
+            </select>
+            <button class="btn-primary mt" id="loadHarvestBtn">Load Components</button>
+          </div>
+          <div class="harvest-list card" id="harvestListPanel">
+            <p class="muted-text">Select a creature type and click Load Components.</p>
+          </div>
+          <div class="harvest-roll card" id="harvestRollPanel">
+            <h3>Harvesting Check</h3>
+            <div class="roll-row">
+              <label class="field-label">Assessment Roll</label>
+              <input type="number" id="assessmentRoll" class="text-input small" placeholder="d20 result" />
+            </div>
+            <div class="roll-row">
+              <label class="field-label">Carving Roll</label>
+              <input type="number" id="carvingRoll" class="text-input small" placeholder="d20 result" />
+            </div>
+            <button class="btn-primary" id="calcHarvestBtn">Calculate Harvest</button>
+            <div id="harvestResult" class="result-block"></div>
+          </div>
+        </div>
+        <div class="card mt" id="essencePanel" style="display:none">
+          <h3>Essence Reference</h3>
+          <div id="essenceTable"></div>
+        </div>
+        <div class="card mt" id="sizesPanel">
+          <h3>Harvest Time by Size</h3>
+          <div id="sizesTable"></div>
+        </div>
+      </section>
+
+      <!-- GENERATOR TAB -->
+      <section class="tab-panel" id="tab-generator">
+        <div class="panel-header">
+          <h2>Monster Parts Generator</h2>
+          <p>Roll randomized loot for a slain creature based on type, CR tier, and battle condition.</p>
+        </div>
+        <div class="generator-controls card">
+          <div class="gen-row">
+            <div>
+              <label class="field-label">Creature Type</label>
+              <select id="genTypeSelect" class="select-input">
+                <option value="">— Select type —</option>
+              </select>
+            </div>
+            <div>
+              <label class="field-label">CR Tier</label>
+              <select id="genCRTier" class="select-input">
+                <option value="low">Low (CR 1–6)</option>
+                <option value="mid">Mid (CR 7–11)</option>
+                <option value="high">High (CR 12–17)</option>
+                <option value="apex">Apex (CR 18+)</option>
+              </select>
+            </div>
+            <div>
+              <label class="field-label">Battle Condition</label>
+              <select id="genCondition" class="select-input">
+                <option value="pristine">Pristine</option>
+                <option value="damaged">Damaged</option>
+                <option value="destroyed">Destroyed</option>
+              </select>
+            </div>
+            <button class="btn-primary self-end" id="genRollBtn">Roll Loot</button>
+          </div>
+        </div>
+        <div class="card mt" id="genResult" style="display:none">
+          <div class="result-header">
+            <h3 id="genResultTitle"></h3>
+            <button class="btn-ghost" id="genCopyBtn">📋 Copy</button>
+          </div>
+          <div id="genResultList"></div>
+        </div>
+      </section>
+
+      <!-- COOKING TAB -->
+      <section class="tab-panel" id="tab-cooking">
+        <div class="panel-header">
+          <h2>Cooking</h2>
+          <p>Find recipes by ingredient, calculate cooking results, and discover boss monster dishes.</p>
+        </div>
+        <div class="cooking-layout">
+          <div class="card" id="recipeFinder">
+            <h3>Recipe Finder</h3>
+            <div class="filter-row">
+              <div>
+                <label class="field-label">Filter by Tier</label>
+                <select id="recipeTierFilter" class="select-input">
+                  <option value="">All Tiers</option>
+                  <option>Novice</option>
+                  <option>Journeyman</option>
+                  <option>Expert</option>
+                  <option>Artisan</option>
+                  <option>Boss</option>
+                </select>
+              </div>
+              <div>
+                <label class="field-label">Filter by Ingredient</label>
+                <select id="recipeIngredientFilter" class="select-input">
+                  <option value="">Any Ingredient</option>
+                  <option value="blood">Blood</option>
+                  <option value="bone">Bone</option>
+                  <option value="brain">Brain</option>
+                  <option value="egg">Egg</option>
+                  <option value="eye">Eye</option>
+                  <option value="fat">Fat</option>
+                  <option value="flesh">Flesh</option>
+                  <option value="heart">Heart</option>
+                  <option value="liver">Liver</option>
+                  <option value="spice">Spice</option>
+                </select>
+              </div>
+              <button class="btn-primary self-end" id="filterRecipesBtn">Search</button>
+            </div>
+            <div id="recipeList" class="recipe-grid"></div>
+          </div>
+          <div class="card" id="cookingCalc">
+            <h3>Cooking Check</h3>
+            <div class="roll-row">
+              <label class="field-label">Con Modifier</label>
+              <input type="number" id="cookCon" class="text-input small" placeholder="+2" />
+            </div>
+            <div class="roll-row">
+              <label class="field-label">Proficiency Bonus</label>
+              <input type="number" id="cookProf" class="text-input small" placeholder="+3" />
+            </div>
+            <div class="roll-row">
+              <label class="field-label">Helper Bonus</label>
+              <input type="number" id="cookHelper" class="text-input small" value="0" />
+            </div>
+            <div class="roll-row">
+              <label class="field-label">d20 Roll</label>
+              <input type="number" id="cookD20" class="text-input small" placeholder="1–20" min="1" max="20" />
+            </div>
+            <div class="roll-row">
+              <label class="field-label">Recipe DC</label>
+              <input type="number" id="cookDC" class="text-input small" placeholder="12–24" />
+            </div>
+            <div class="roll-row">
+              <label class="field-label">Ingredient Rarity</label>
+              <select id="cookRarity" class="select-input">
+                <option value="uncommon">Uncommon</option>
+                <option value="rare">Rare</option>
+                <option value="very_rare">Very Rare</option>
+                <option value="legendary">Legendary</option>
+              </select>
+            </div>
+            <button class="btn-primary" id="calcCookBtn">Roll!</button>
+            <div id="cookResult" class="result-block"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- CRAFTING TAB -->
+      <section class="tab-panel" id="tab-crafting">
+        <div class="panel-header">
+          <h2>Crafting</h2>
+          <p>Browse magic items, filter by creature type, rarity, or search by name.</p>
+        </div>
+        <div class="craft-controls card">
+          <div class="gen-row">
+            <div>
+              <label class="field-label">Search</label>
+              <input type="text" id="craftSearch" class="text-input" placeholder="Item name…" />
+            </div>
+            <div>
+              <label class="field-label">Creature Type</label>
+              <select id="craftTypeFilter" class="select-input">
+                <option value="">All Types</option>
+              </select>
+            </div>
+            <div>
+              <label class="field-label">Rarity</label>
+              <select id="craftRarityFilter" class="select-input">
+                <option value="">All Rarities</option>
+                <option value="uncommon">Uncommon</option>
+                <option value="rare">Rare</option>
+                <option value="very_rare">Very Rare</option>
+                <option value="legendary">Legendary</option>
+              </select>
+            </div>
+            <button class="btn-primary self-end" id="craftSearchBtn">Search</button>
+          </div>
+        </div>
+        <div class="card mt">
+          <div id="craftTable" class="craft-table-wrap"></div>
+        </div>
+        <div class="card mt">
+          <h3>Harvest Skills by Creature Type</h3>
+          <div id="harvestSkillTable"></div>
+        </div>
+      </section>
+
+      <!-- EFFECTS TAB -->
+      <section class="tab-panel" id="tab-effects">
+        <div class="panel-header">
+          <h2>Ingredient Effects</h2>
+          <p>Select a component type and rarity to see what each creature type provides.</p>
+        </div>
+        <div class="effects-controls card">
+          <div class="gen-row">
+            <div>
+              <label class="field-label">Component Type</label>
+              <select id="effectTypeSelect" class="select-input">
+                <option value="blood">Blood</option>
+                <option value="bone">Bone</option>
+                <option value="brain">Brain</option>
+                <option value="egg">Egg</option>
+                <option value="eye">Eye</option>
+                <option value="fat">Fat</option>
+                <option value="flesh">Flesh</option>
+                <option value="heart">Heart</option>
+                <option value="liver">Liver</option>
+                <option value="spice">Spice</option>
+              </select>
+            </div>
+            <div>
+              <label class="field-label">Rarity</label>
+              <select id="effectRaritySelect" class="select-input">
+                <option value="uncommon">Uncommon</option>
+                <option value="rare">Rare</option>
+                <option value="very_rare">Very Rare</option>
+                <option value="legendary">Legendary</option>
+              </select>
+            </div>
+            <button class="btn-primary self-end" id="loadEffectsBtn">Load Effects</button>
+          </div>
+        </div>
+        <div class="card mt" id="effectsGrid"></div>
+      </section>
+
+      <!-- DICE & QUIRKS TAB -->
+      <section class="tab-panel" id="tab-dice">
+        <div class="panel-header">
+          <h2>Dice & Quirks</h2>
+          <p>Roll dice and determine cooking quirk flaws and boons.</p>
+        </div>
+        <div class="dice-layout">
+          <div class="card">
+            <h3>Dice Roller</h3>
+            <div class="dice-row">
+              <input type="number" id="diceCount" class="text-input small" value="1" min="1" max="20" />
+              <span class="dice-label">d</span>
+              <select id="diceSides" class="select-input small">
+                <option>4</option>
+                <option>6</option>
+                <option>8</option>
+                <option selected>10</option>
+                <option>12</option>
+                <option>20</option>
+                <option>100</option>
+              </select>
+              <span class="dice-label">+</span>
+              <input type="number" id="diceMod" class="text-input small" value="0" />
+            </div>
+            <button class="btn-primary" id="rollDiceBtn">Roll!</button>
+            <div id="diceResult" class="result-block dice-result"></div>
+          </div>
+          <div class="card">
+            <h3>Cooking Quirk Generator</h3>
+            <div class="roll-row">
+              <label class="field-label">Cooking Total</label>
+              <input type="number" id="quirkTotal" class="text-input small" placeholder="e.g. 19" />
+            </div>
+            <div class="roll-row">
+              <label class="field-label">Recipe DC</label>
+              <input type="number" id="quirkDC" class="text-input small" placeholder="e.g. 16" />
+            </div>
+            <div class="roll-row">
+              <label class="field-label">Essence Rarity</label>
+              <select id="quirkRarity" class="select-input">
+                <option value="uncommon">Uncommon</option>
+                <option value="rare">Rare</option>
+                <option value="very_rare">Very Rare</option>
+                <option value="legendary">Legendary</option>
+              </select>
+            </div>
+            <button class="btn-primary" id="genQuirkBtn">Generate Quirk</button>
+            <div id="quirkResult" class="result-block"></div>
+          </div>
+          <div class="card">
+            <h3>All Quirks Reference</h3>
+            <div id="quirksRef"></div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>
